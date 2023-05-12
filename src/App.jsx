@@ -1,85 +1,72 @@
-import { useEffect, useState } from 'react'
-import './App.css'
-import UsersForm from './components/UserForm'
-import UserList from './components/UserList'
-import axios from 'axios'
-import WarningDelete from './components/WarningDelete'
+import { useEffect, useState } from 'react';
+import './App.css';
+import UserForm from './components/UserForm';
+import UserList from './components/UserList';
+import axios from 'axios';
+import WarningDelete from './components/WarningDelete';
 
 function App() {
-
-  const [usersList, setUsersList] = useState([])
-  const [userSelected, setUserSelected] = useState(null)
-  const [form, setForm] = useState(false)
-  const [alert, setAlert] = useState(false)
-  const [userToDelete, setUserToDelete] = useState(null)
+  const [usersList, setUsersList] = useState([]);
+  const [userSelected, setUserSelected] = useState(null);
+  const [showForm, setShowForm] = useState(false);
+  const [alert, setAlert] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
 
   useEffect(() => {
-    getUsers()
-  }, [])
+    getUsers();
+  }, []);
 
   const getUsers = () => {
-    axios
-      .get(`https://users-crud.academlo.tech/users/`)
-      .then(res => setUsersList(res.data))
-  }
+    axios.get('http://localhost:8080/users').then((res) => setUsersList(res.data));
+  };
 
   const selectUser = (user) => {
-    getForm()
-    setUserSelected(user)
-  }
-
-//======= WINDOWS WARNING (FUNCTION TO COMPONENTS) ========
-  const warning = (user) => {
-    setAlert(true)
-    setUserToDelete(user)
-  }
-  
-//========DELETE/CANCEL DELETE(FUNCTION)====
-  const deleteUser = (user) => {
-    axios
-      .delete(`https://users-crud.academlo.tech/users/${user.id}/`)
-      .then(() => getUsers());
-
-    setAlert(false)
+    setShowForm(true);
+    setUserSelected(user);
   };
+
+  const showWarning = (user) => {
+    setAlert(true);
+    setUserToDelete(user);
+  };
+
+  const deleteUser = (user) => {
+    axios.delete(`http://localhost:8080/users/${user.id}`).then(() => {
+      getUsers();
+      setAlert(false);
+    });
+  };
+
   const cancelDelete = () => {
-    setUserToDelete(null)
-    setAlert(false)
-  }
+    setUserToDelete(null);
+    setAlert(false);
+  };
 
-//========= OPEN/CLOSE FORM ========
-  const getForm = () => {
-    setForm(true)
-  }
+  const openForm = () => {
+    setShowForm(true);
+  };
+
   const closeForm = () => {
-    setForm(false)
-    setUserSelected(null)
-  }
-
+    setShowForm(false);
+    setUserSelected(null);
+  };
 
   return (
     <div className="App">
-      {form &&
-        <UsersForm
-          getUsers={getUsers}
-          userSelected={userSelected}
-          setUserSelected={setUserSelected}
-          closeForm={closeForm}
-        />}
-      <UserList
-        usersList={usersList}
-        selectUser={selectUser}
-        getForm={getForm}
-        warning={warning} />
-      <WarningDelete
-        alert={alert}
-        userToDelete={userToDelete}
-        deleteUser={deleteUser}
-        cancelDelete={cancelDelete}
-      />
-      <footer><p>By <strong>Jesus Agamez</strong> | G-21 Academlo</p></footer>
+      {showForm && (
+        <UserForm getUsers={getUsers} userSelected={userSelected} setUserSelected={setUserSelected} closeForm={closeForm} />
+      )}
+      <UserList usersList={usersList} selectUser={selectUser} openForm={openForm} showWarning={showWarning} />
+      {alert && (
+        <WarningDelete alert={alert} userToDelete={userToDelete} deleteUser={deleteUser} cancelDelete={cancelDelete} />
+      )}
+      <footer>
+        <p>
+          By <strong>Jesus Agamez</strong> | G-23 Academlo
+        </p>
+      </footer>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
